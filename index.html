@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GastoTRACK</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="gtr logo.png">
+    <style>
+        /* Esconde a barra de rolagem da página inteira */
+        html {
+            overflow-y: scroll; /* Garante que a rolagem funcione */
+        }
+
+        body {
+            overflow-y: auto; /* Permite rolagem */
+        }
+
+        /* Esconde a barra de rolagem no Chrome, Safari e Edge */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Esconde a barra de rolagem no Firefox */
+        body {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer */
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #e0e0e0;
+            font-family: Arial, sans-serif;
+            transition: background 0.5s, color 0.5s;
+            font-family: 'Roboto', sans-serif;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            position: relative;
+        }
+        
+        .main-box, .total-box {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            width: 350px;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .total-box {
+            opacity: 0; 
+            position: absolute; 
+            left: 0;
+            top: 0;
+            transform: translateX(100%);
+            pointer-events: none;
+            overflow-y: auto; /* Permite rolagem */
+        }
+        .total-box.show {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        /* Esconde a barra de rolagem no Chrome, Safari e Edge */
+        .total-box::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Esconde a barra de rolagem no Firefox */
+        .total-box {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer */
+        }
+
+        #gastoList {
+            overflow-y: auto; /* Permite rolagem */
+            width: 100%;
+        }
+
+        /* Esconde a barra de rolagem no Chrome, Safari e Edge */
+        #gastoList::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Esconde a barra de rolagem no Firefox */
+        #gastoList {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer */
+        }
+
+        input, select, button {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin: 5px 0;
+            box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+        }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+            z-index: 2;
+        }
+        body.dark {
+            background: #1b1e23;
+            color: white;
+        }
+        body.dark .main-box, body.dark .total-box, body.dark input, body.dark select, body.dark button {
+            background: #252830;
+            box-shadow: 10px 10px 20px #141518, -10px -10px 20px #2e3138;
+            color: white;
+        }
+        body.dark .theme-toggle {
+            background: #252830;
+            box-shadow: 5px 5px 10px #141518, -5px -5px 10px #2e3138;
+        }
+        body.dark .back-button {
+            background-color: #ff4444;
+        }
+        body.dark .theme-toggle::before {
+            content: "☀️";
+        }
+        .theme-toggle::before {
+            content: "🌙";
+        }
+        body.dark .item {
+            background: #252830;
+            box-shadow: 5px 5px 10px #141518, -5px -5px 10px #2e3138;
+            color: white;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()"></div>
+    <div class="container">
+        <div class="main-box" id="mainBox">
+            <h2>GastoTRACK</h2>
+            <input type="text" id="productName" placeholder="Nome do produto">
+            <input type="number" id="productPrice" placeholder="Valor em R$">
+            <select id="productQuantity">
+                <option value="1">1</option>
+                <script>
+                    for (let i = 2; i <= 100; i++) {
+                        document.write(`<option value="${i}">${i}</option>`);
+                    }
+                </script>
+            </select>
+            <button onclick="addGasto()">Adicionar Gasto</button>
+            <h3 id="totalAmount">Total gasto: R$ 0.00</h3>
+            <button onclick="showTotalView()">Ver Total</button>
+        </div>
+        <div class="total-box" id="totalBox">
+            <h2>Gastos Totais</h2>
+            <div id="gastoList"></div> 
+            <h3 id="grandTotal">Total: R$ 0.00</h3>
+            <button class="back-button" onclick="showTotalView()">Voltar</button>
+        </div>
+    </div>
+    <script>
+        let gastos = [];
+        function addGasto() {
+            let name = document.getElementById("productName").value;
+            let price = parseFloat(document.getElementById("productPrice").value);
+            let quantity = parseInt(document.getElementById("productQuantity").value);
+            if (!name || !price) return;
+            gastos.push({ name, price, quantity });
+            saveGastos(); // Salva no LocalStorage
+            updateTotal();
+            renderGastoList();
+        }
+
+        function updateTotal() {
+            let total = gastos.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            document.getElementById("totalAmount").innerText = `Total gasto: R$ ${total.toFixed(2)}`;
+            document.getElementById("grandTotal").innerText = `Total: R$ ${total.toFixed(2)}`;
+        }
+        function showTotalView() {
+            document.getElementById("totalBox").classList.toggle("show");
+        }
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            const isDark = document.body.classList.contains("dark");
+            localStorage.setItem("theme", isDark ? "dark" : "light"); // Salva o tema
+        }
+        function loadTheme() {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "dark") {
+                document.body.classList.add("dark"); // Mantém no modo escuro
+            }
+        }
+        loadTheme();
+
+        function renderGastoList() {
+            const gastoList = document.getElementById("gastoList");
+            gastoList.innerHTML = "";
+            gastos.forEach((gasto, index) => {
+                const total = gasto.price * gasto.quantity;
+                const itemDiv = document.createElement("div");
+                itemDiv.className = "item";
+                itemDiv.innerHTML = `
+                    ${gasto.name} (${gasto.quantity}x R$ ${gasto.price.toFixed(2)}) = R$ ${total.toFixed(2)}
+                    <button class="delete-btn" onclick="removeGasto(${index})">🗑️</button>
+                `;
+                gastoList.appendChild(itemDiv);
+            });
+        }
+
+        function removeGasto(index) {
+            gastos.splice(index, 1);
+            saveGastos(); // Salva após remover
+            updateTotal();
+            renderGastoList();
+        }
+
+        function saveGastos() {
+            localStorage.setItem("gastos", JSON.stringify(gastos));
+        }
+        function loadGastos() {
+            const savedGastos = localStorage.getItem("gastos");
+            if (savedGastos) {
+                gastos = JSON.parse(savedGastos);
+                updateTotal();
+                renderGastoList();
+            }
+        }
+
+        loadGastos();
+    </script>
+</body>
+</html>
