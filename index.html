@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GastoTRACK</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="gtr logo.png">
+    <link rel="icon" type="image/x-icon" href="gtk logo nova.png">
     <style>
         /* Esconde a barra de rolagem da página inteira */
         html {
@@ -33,10 +33,29 @@
             align-items: center;
             height: 100vh;
             background: #e0e0e0;
-            font-family: Arial, sans-serif;
-            transition: background 0.5s, color 0.5s;
             font-family: 'Roboto', sans-serif;
+            transition: background 0.5s, color 0.5s;
         }
+
+        /* Estilo da notificação */
+        .notification {
+            position: fixed;
+            top: -100px; /* Começa fora da tela */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: top 0.5s ease-in-out;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            top: 20px; /* Aparece na tela */
+        }
+
         .container {
             display: flex;
             gap: 20px;
@@ -177,6 +196,9 @@
     </style>
 </head>
 <body>
+    <!-- Notificação -->
+    <div id="notification" class="notification"></div>
+
     <div class="theme-toggle" onclick="toggleTheme()"></div>
     <div class="container">
         <div class="main-box" id="mainBox">
@@ -203,16 +225,47 @@
         </div>
     </div>
     <script>
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(() => console.log('Service Worker registrado'))
+            .catch((err) => console.log('Erro ao registrar Service Worker:', err));
+        }
+      </script>
+    <script>
         let gastos = [];
+
         function addGasto() {
             let name = document.getElementById("productName").value;
             let price = parseFloat(document.getElementById("productPrice").value);
             let quantity = parseInt(document.getElementById("productQuantity").value);
             if (!name || !price) return;
+
+            // Adiciona o produto
             gastos.push({ name, price, quantity });
-            saveGastos(); // Salva no LocalStorage
+            saveGastos();
             updateTotal();
             renderGastoList();
+
+            // Mostra a notificação
+            showNotification("Produto adicionado!");
+
+            // Reseta os valores das caixas
+            resetInputs();
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById("notification");
+            notification.textContent = message; // Define a mensagem
+            notification.classList.add("show"); // Mostra a notificação
+            setTimeout(() => {
+                notification.classList.remove("show"); // Esconde após 2 segundos
+            }, 2000);
+        }
+
+        function resetInputs() {
+            document.getElementById("productName").value = ""; // Limpa o nome
+            document.getElementById("productPrice").value = ""; // Limpa o valor
+            document.getElementById("productQuantity").value = "1"; // Reseta a quantidade para 1
         }
 
         function updateTotal() {
@@ -220,18 +273,21 @@
             document.getElementById("totalAmount").innerText = `Total gasto: R$ ${total.toFixed(2)}`;
             document.getElementById("grandTotal").innerText = `Total: R$ ${total.toFixed(2)}`;
         }
+
         function showTotalView() {
             document.getElementById("totalBox").classList.toggle("show");
         }
+
         function toggleTheme() {
             document.body.classList.toggle("dark");
             const isDark = document.body.classList.contains("dark");
-            localStorage.setItem("theme", isDark ? "dark" : "light"); // Salva o tema
+            localStorage.setItem("theme", isDark ? "dark" : "light");
         }
+
         function loadTheme() {
             const savedTheme = localStorage.getItem("theme");
             if (savedTheme === "dark") {
-                document.body.classList.add("dark"); // Mantém no modo escuro
+                document.body.classList.add("dark");
             }
         }
         loadTheme();
@@ -253,14 +309,16 @@
 
         function removeGasto(index) {
             gastos.splice(index, 1);
-            saveGastos(); // Salva após remover
+            saveGastos();
             updateTotal();
             renderGastoList();
+            showNotification("Produto removido!"); // Mostra a notificação de remoção
         }
 
         function saveGastos() {
             localStorage.setItem("gastos", JSON.stringify(gastos));
         }
+
         function loadGastos() {
             const savedGastos = localStorage.getItem("gastos");
             if (savedGastos) {
